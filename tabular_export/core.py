@@ -45,7 +45,11 @@ def get_field_names_from_queryset(qs):
     field_names = []
     field_names.extend(i.target.name for i in v_qs.query.select)
     field_names.extend(v_qs.query.extra_select.keys())
-    field_names.extend(v_qs.query.aggregate_select.keys())
+    try:
+        # for django 1.10 and up (works starting in 1.8)
+        field_names.extend(v_qs.query.annotation_select.keys())
+    except AttributeError:
+        field_names.extend(v_qs.query.aggregate_select.keys())
 
     return field_names
 
