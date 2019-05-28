@@ -13,15 +13,18 @@ class TestModelAdmin(admin.ModelAdmin):
     actions = (export_to_excel_action, export_to_csv_action)
 
     # For testing, we'll make this more complicated by adding a computed column:
-    list_display = ('title', 'tags_count')
+    list_display = ("title", "tags_count")
 
     def tags_count(self, obj):
         return obj.tags_count
+
     tags_count.short_description = "Tags Count"
-    tags_count.admin_order_field = 'tags_count'
+    tags_count.admin_order_field = "tags_count"
 
     def get_queryset(self, *args, **kwargs):
-        return self.model.objects.all().annotate(tags_count=Count('tags', distinct=True))
+        return self.model.objects.all().annotate(
+            tags_count=Count("tags", distinct=True)
+        )
 
 
 admin.site.register(TestModel, TestModelAdmin)
