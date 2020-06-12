@@ -32,27 +32,36 @@ def ensure_filename(suffix):
         @wraps(f)
         def inner(modeladmin, request, queryset, filename=None, *args, **kwargs):
             if filename is None:
-                filename = '%s.%s' % (force_text(modeladmin.model._meta.verbose_name_plural), suffix)
+                filename = "%s.%s" % (
+                    force_text(modeladmin.model._meta.verbose_name_plural),
+                    suffix,
+                )
             return f(modeladmin, request, queryset, filename=filename, *args, **kwargs)
+
         return inner
+
     return outer
 
 
-@ensure_filename('xlsx')
-def export_to_excel_action(modeladmin, request, queryset, filename=None, field_names=None):
+@ensure_filename("xlsx")
+def export_to_excel_action(
+    modeladmin, request, queryset, filename=None, field_names=None
+):
     """Django admin action which exports selected records as an Excel XLSX download"""
     headers, rows = flatten_queryset(queryset, field_names=field_names)
     return export_to_excel_response(filename, headers, rows)
 
 
-export_to_excel_action.short_description = _('Export to Excel')
+export_to_excel_action.short_description = _("Export to Excel")
 
 
-@ensure_filename('csv')
-def export_to_csv_action(modeladmin, request, queryset, filename=None, field_names=None):
+@ensure_filename("csv")
+def export_to_csv_action(
+    modeladmin, request, queryset, filename=None, field_names=None
+):
     """Django admin action which exports the selected records as a CSV download"""
     headers, rows = flatten_queryset(queryset, field_names=field_names)
     return export_to_csv_response(filename, headers, rows)
 
 
-export_to_csv_action.short_description = _('Export to CSV')
+export_to_csv_action.short_description = _("Export to CSV")
