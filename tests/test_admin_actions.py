@@ -67,3 +67,24 @@ class TestAdminActions(TestCase):
         self.assertRegexpMatches(content[0], r'^ID,title,tags_count')
         self.assertRegexpMatches(content[1], r'^1,TEST ITEM 1,0\r\n')
         self.assertRegexpMatches(content[2], r'^2,TEST ITEM 2,0\r\n')
+
+    def test_custom_export_to_csv_action(self):
+        changelist_url = reverse('admin:tests_testmodel_changelist')
+
+        data = {'action': 'custom_export_to_csv_action',
+                'select_across': 1,
+                'index': 0,
+                ACTION_CHECKBOX_NAME: TestModel.objects.first().pk}
+        response = self.client.post(changelist_url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Content-Disposition', response)
+        self.assertEqual("attachment; filename*=UTF-8''test%20models.csv",
+                         response['Content-Disposition'])
+        self.assertEqual('text/csv; charset=utf-8',
+                         response['Content-Type'])
+
+        content = list(i.decode('utf-8') for i in response.streaming_content)
+        self.assertEqual(len(content), TestModel.objects.count() + 1)
+        self.assertRegexpMatches(content[0], r'^ID,title,number of tags')
+        self.assertRegexpMatches(content[1], r'^1,TEST ITEM 1,0\r\n')
+        self.assertRegexpMatches(content[2], r'^2,TEST ITEM 2,0\r\n')
