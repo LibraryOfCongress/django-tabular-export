@@ -14,7 +14,11 @@ from __future__ import absolute_import, division, print_function
 
 from functools import wraps
 
-from django.utils.encoding import force_text
+try:
+    # django 4.0 +
+    from django.utils.encoding import force_str as force_text
+except ImportError:
+    from django.utils.encoding import force_text
 from django.utils.translation import gettext_lazy as _
 
 from .core import export_to_csv_response, export_to_excel_response, flatten_queryset

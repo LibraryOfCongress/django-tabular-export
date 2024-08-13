@@ -23,12 +23,16 @@ import datetime
 import sys
 from functools import wraps
 from itertools import chain
+from urllib.parse import quote as urlquote
 
 import xlsxwriter
 from django.conf import settings
 from django.http import HttpResponse, StreamingHttpResponse
-from django.utils.encoding import force_text
-from django.utils.http import urlquote
+try:
+    # django 4.0 +
+    from django.utils.encoding import force_str as force_text
+except ImportError:
+    from django.utils.encoding import force_text
 from django.views.decorators.cache import never_cache
 
 

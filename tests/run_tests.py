@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import sys
+from uuid import uuid4
 
 import django
 from django.conf import settings
@@ -35,10 +36,26 @@ settings.configure(DEBUG=True,
                        'tests',
                    ],
                    SITE_ID=1,
-                   MIDDLEWARE_CLASSES=('django.contrib.sessions.middleware.SessionMiddleware',
-                                       'django.contrib.auth.middleware.AuthenticationMiddleware',
-                                       'django.contrib.messages.middleware.MessageMiddleware'),
-                   ROOT_URLCONF='tests.urls')
+                   MIDDLEWARE=(
+                      'django.contrib.sessions.middleware.SessionMiddleware',
+                      'django.contrib.auth.middleware.AuthenticationMiddleware',
+                      'django.contrib.messages.middleware.MessageMiddleware'),
+                   ROOT_URLCONF='tests.urls',
+                   TEMPLATES=[
+                      {
+                          'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                          'OPTIONS': {
+                              'context_processors': [
+                                  'django.contrib.auth.context_processors.auth',
+                                  'django.contrib.messages.context_processors.messages',
+                              ],
+                              'loaders': [
+                                  'django.template.loaders.app_directories.Loader',
+                              ],
+                          },
+                      },
+                  ],
+                  SECRET_KEY=uuid4(),)
 
 django.setup()
 

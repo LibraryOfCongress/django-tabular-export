@@ -3,7 +3,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+try:
+   from django.urls import reverse
+except ImportError:
+   from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
 
 from .models import TestModel
