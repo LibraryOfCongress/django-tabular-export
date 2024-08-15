@@ -13,7 +13,22 @@ jobs:
     strategy:
       matrix:
         python: ["3.9", "3.10", "3.11", "3.12"]
+        # current mainstream support is at 4.2
         django: ["4.0", "4.1", "4.2", "5.0", "5.1"]
+      exclude:
+           # django 5.0 and 5.1 require python 3.10 minimum
+          - python: "3.9"
+            django: 5.0
+          - python: "3.9"
+            django: 5.1
+          # django 4.0 only goes up to python 3.10
+          - python: "3.11"
+            django: 4.0
+          - python: "3.12"
+            django: 4.0
+          # django 4.1 only goes up to python 3.11
+          - python: "3.12"
+            django: 4.1
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
