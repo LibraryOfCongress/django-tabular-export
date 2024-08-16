@@ -16,6 +16,7 @@ advance using whatever optimizations are possible and pass the data in directly.
 If your Django settings module sets ``TABULAR_RESPONSE_DEBUG`` to ``True`` the data will be dumped as an HTML
 table and will not be delivered as a download.
 """
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import csv
@@ -29,7 +30,7 @@ import xlsxwriter
 from django.conf import settings
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils.encoding import force_str
-from django.views.decorators.cache import never_cache
+from django.utils.cache import add_never_cache_headers
 
 
 def get_field_names_from_queryset(qs):
@@ -112,8 +113,9 @@ def return_debug_reponse(f):
         if not getattr(settings, 'TABULAR_RESPONSE_DEBUG', False):
             return f(filename, *args, **kwargs)
         else:
-            resp = never_cache(export_to_debug_html_response)(filename, *args, **kwargs)
-            del resp['Content-Disposition']  # Don't trigger a download
+            resp = export_to_debug_html_response(filename, *args, **kwargs)
+            del resp["Content-Disposition"]  # Don't trigger a download
+            add_never_cache_headers(resp)
             return resp
 
     return inner
