@@ -23,5 +23,15 @@ class TestModelAdmin(admin.ModelAdmin):
     def get_queryset(self, *args, **kwargs):
         return self.model.objects.all().annotate(tags_count=Count('tags', distinct=True))
 
+    def custom_export_to_csv_action(self, request, queryset):
+        # Add a custom action with the extra verbose name "number of tags"
+        return export_to_csv_action(
+            self,
+            request,
+            queryset,
+            extra_verbose_names={'tags_count': 'number of tags'},
+        )
+
+    actions = (export_to_excel_action, export_to_csv_action, custom_export_to_csv_action)
 
 admin.site.register(TestModel, TestModelAdmin)
