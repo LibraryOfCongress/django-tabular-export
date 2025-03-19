@@ -72,7 +72,6 @@ class TestAdminActions(TestCase):
         self.assertRegex(content[1], r'^1,TEST ITEM 1,0\r\n')
         self.assertRegex(content[2], r'^2,TEST ITEM 2,0\r\n')
 
-    @unittest.skip("error (where is custom export configured?)")
     def test_custom_export_to_csv_action(self):
         changelist_url = reverse('admin:tests_testmodel_changelist')
 
@@ -90,6 +89,6 @@ class TestAdminActions(TestCase):
 
         content = list(i.decode('utf-8') for i in response.streaming_content)
         self.assertEqual(len(content), TestModel.objects.count() + 1)
-        self.assertRegexpMatches(content[0], r'^ID,title,number of tags')
-        self.assertRegexpMatches(content[1], r'^1,TEST ITEM 1,0\r\n')
-        self.assertRegexpMatches(content[2], r'^2,TEST ITEM 2,0\r\n')
+        self.assertRegex(content[0], r'^ID,title,number of tags')
+        self.assertRegex(content[1], r'^1,TEST ITEM 1,0\r\n')
+        self.assertRegex(content[2], r'^2,TEST ITEM 2,0\r\n')
