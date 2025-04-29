@@ -16,6 +16,7 @@ advance using whatever optimizations are possible and pass the data in directly.
 If your Django settings module sets ``TABULAR_RESPONSE_DEBUG`` to ``True`` the data will be dumped as an HTML
 table and will not be delivered as a download.
 """
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import csv
@@ -23,13 +24,13 @@ import datetime
 import sys
 from functools import wraps
 from itertools import chain
+from urllib.parse import quote as urlquote
 
 import xlsxwriter
 from django.conf import settings
 from django.http import HttpResponse, StreamingHttpResponse
-from django.utils.encoding import force_text
-from django.utils.http import urlquote
-from django.views.decorators.cache import never_cache
+from django.utils.encoding import force_str
+from django.utils.cache import add_never_cache_headers
 
 
 def get_field_names_from_queryset(qs):
@@ -90,7 +91,7 @@ def convert_value_to_unicode(v):
     elif hasattr(v, 'isoformat'):
         return v.isoformat()
     else:
-        return force_text(v)
+        return force_str(v)
 
 
 def set_content_disposition(f):
@@ -112,8 +113,9 @@ def return_debug_reponse(f):
         if not getattr(settings, 'TABULAR_RESPONSE_DEBUG', False):
             return f(filename, *args, **kwargs)
         else:
-            resp = never_cache(export_to_debug_html_response)(filename, *args, **kwargs)
-            del resp['Content-Disposition']  # Don't trigger a download
+            resp = export_to_debug_html_response(filename, *args, **kwargs)
+            del resp["Content-Disposition"]  # Don't trigger a download
+            add_never_cache_headers(resp)
             return resp
 
     return inner
@@ -175,7 +177,7 @@ def export_to_excel_response(filename, headers, rows):
             elif isinstance(col, datetime.date):
                 worksheet.write_datetime(y, x, col, date_format)
             else:
-                worksheet.write(y, x, force_text(col, strings_only=True))
+                worksheet.write(y, x, force_str(col, strings_only=True))
 
     workbook.close()
 

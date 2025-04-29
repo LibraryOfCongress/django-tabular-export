@@ -1,0 +1,60 @@
+name: unit tests
+
+on:
+  push: # run on every push or PR to any branch
+  pull_request:
+  schedule: # run automatically on main branch each Tuesday at 11am
+    - cron: "0 16 * * 2"
+
+jobs:
+  python-unit:
+    name: Python unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        django: ["4.0", "4.1", "4.2", "5.0", "5.1"]
+        exclude:
+           # django 5.0 and 5.1 require python 3.10 minimum
+          - python: "3.9"
+            django: 5.0
+          - python: "3.9"
+            django: 5.1
+          # django 4.0 only goes up to python 3.10
+          - python: "3.11"
+            django: 4.0
+          - python: "3.12"
+            django: 4.0
+          - python: "3.13"
+            django: 4.0
+          # django 4.1 only goes up to python 3.11
+          - python: "3.12"
+            django: 4.1
+          - python: "3.13"
+            django: 4.1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      # Base python cache on the hash of test requirements file
+      # if the file changes, the cache is invalidated.
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements-test.txt') }}
+          restore-keys: |
+            pip-${{ hashFiles('requirements-test.txt') }}
+
+      - name: Install package with dependencies
+        run: |
+          pip install -q Django==${{ matrix.django }}
+          pip install -r requirements-test.txt
+
+      - name: Run python tests
+        run: python tests/run_tests.py

@@ -1,9 +1,13 @@
 # encoding: utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
+import unittest
 
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
 
 from .models import TestModel
@@ -64,9 +68,9 @@ class TestAdminActions(TestCase):
 
         content = list(i.decode('utf-8') for i in response.streaming_content)
         self.assertEqual(len(content), TestModel.objects.count() + 1)
-        self.assertRegexpMatches(content[0], r'^ID,title,tags_count')
-        self.assertRegexpMatches(content[1], r'^1,TEST ITEM 1,0\r\n')
-        self.assertRegexpMatches(content[2], r'^2,TEST ITEM 2,0\r\n')
+        self.assertRegex(content[0], r'^ID,title,tags_count')
+        self.assertRegex(content[1], r'^1,TEST ITEM 1,0\r\n')
+        self.assertRegex(content[2], r'^2,TEST ITEM 2,0\r\n')
 
     def test_custom_export_to_csv_action(self):
         changelist_url = reverse('admin:tests_testmodel_changelist')
@@ -85,6 +89,6 @@ class TestAdminActions(TestCase):
 
         content = list(i.decode('utf-8') for i in response.streaming_content)
         self.assertEqual(len(content), TestModel.objects.count() + 1)
-        self.assertRegexpMatches(content[0], r'^ID,title,number of tags')
-        self.assertRegexpMatches(content[1], r'^1,TEST ITEM 1,0\r\n')
-        self.assertRegexpMatches(content[2], r'^2,TEST ITEM 2,0\r\n')
+        self.assertRegex(content[0], r'^ID,title,number of tags')
+        self.assertRegex(content[1], r'^1,TEST ITEM 1,0\r\n')
+        self.assertRegex(content[2], r'^2,TEST ITEM 2,0\r\n')

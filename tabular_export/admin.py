@@ -14,7 +14,7 @@ from __future__ import absolute_import, division, print_function
 
 from functools import wraps
 
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
 from .core import export_to_csv_response, export_to_excel_response, flatten_queryset
@@ -32,7 +32,7 @@ def ensure_filename(suffix):
         @wraps(f)
         def inner(modeladmin, request, queryset, filename=None, *args, **kwargs):
             if filename is None:
-                filename = '%s.%s' % (force_text(modeladmin.model._meta.verbose_name_plural), suffix)
+                filename = '%s.%s' % (force_str(modeladmin.model._meta.verbose_name_plural), suffix)
             return f(modeladmin, request, queryset, filename=filename, *args, **kwargs)
         return inner
     return outer
