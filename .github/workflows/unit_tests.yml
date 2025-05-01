@@ -1,5 +1,8 @@
 name: unit tests
 
+permissions:
+  contents: read
+
 on:
   push: # run on every push or PR to any branch
   pull_request:
