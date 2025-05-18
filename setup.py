@@ -9,7 +9,8 @@ readme = open("README.rst").read()
 
 setup(
     name="django-tabular-export",
-    version="1.2.0",
+    setup_requires=["setuptools_scm"],
+    use_scm_version=True,
     description="""Simple spreadsheet exports from Django""",
     long_description=readme,
     author="Chris Adams",
