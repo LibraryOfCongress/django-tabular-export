@@ -1,9 +1,19 @@
 Changelog
 =========
 
+v1.2.1 (2025-05-18)
+-------------------
+
+- PyPI releases via GitHub Actions with attestation
+
+v1.2.0 (2025-04-29)
+-------------------
+
+- Support for modern versions of Django
 
 v1.1.0 (2017-10-31)
 -------------------
+
 - Enable Python 3.6 for testing
 - Update for ORM changes (Django 1.10+ compatibility)
 
