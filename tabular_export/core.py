@@ -38,7 +38,7 @@ def get_field_names_from_queryset(qs):
 
     # We'll set the queryset to include all fields including calculated aggregates
     # using the same names which a values() queryset would return:
-    if hasattr(qs, 'values'):
+    if hasattr(qs, "values"):
         v_qs = qs.values()
     else:
         v_qs = qs
@@ -87,8 +87,8 @@ def convert_value_to_unicode(v):
     """
 
     if v is None:
-        return u''
-    elif hasattr(v, 'isoformat'):
+        return ""
+    elif hasattr(v, "isoformat"):
         return v.isoformat()
     else:
         return force_str(v)
@@ -96,12 +96,16 @@ def convert_value_to_unicode(v):
 
 def set_content_disposition(f):
     """Ensure that an HttpResponse has the Content-Disposition header set using the input filename= kwarg"""
+
     @wraps(f)
     def inner(filename, *args, **kwargs):
         response = f(filename, *args, **kwargs)
         # See RFC 5987 for the filename* spec:
-        response['Content-Disposition'] = "attachment; filename*=UTF-8''%s" % urlquote(filename)
+        response["Content-Disposition"] = "attachment; filename*=UTF-8''%s" % urlquote(
+            filename
+        )
         return response
+
     return inner
 
 
@@ -110,7 +114,7 @@ def return_debug_reponse(f):
 
     @wraps(f)
     def inner(filename, *args, **kwargs):
-        if not getattr(settings, 'TABULAR_RESPONSE_DEBUG', False):
+        if not getattr(settings, "TABULAR_RESPONSE_DEBUG", False):
             return f(filename, *args, **kwargs)
         else:
             resp = export_to_debug_html_response(filename, *args, **kwargs)
@@ -126,25 +130,28 @@ def export_to_debug_html_response(filename, headers, rows):
 
     def output_generator():
         # Note the use of bytestrings to avoid unnecessary Unicode-bytes cycles:
-        yield b'<!DOCTYPE html><html>'
+        yield b"<!DOCTYPE html><html>"
         yield b'<head><meta charset="utf-8"><title>TABULAR DEBUG</title>'
         yield b'<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">'
-        yield b'</head>'
+        yield b"</head>"
         yield b'<body class="container-fluid"><div class="table-responsive"><table class="table table-striped">'
-        yield b'<thead><tr><th>'
-        yield b'</th><th>'.join(convert_value_to_unicode(i).encode('utf-8') for i in headers)
-        yield b'</th></tr></thead>'
+        yield b"<thead><tr><th>"
+        yield b"</th><th>".join(
+            convert_value_to_unicode(i).encode("utf-8") for i in headers
+        )
+        yield b"</th></tr></thead>"
 
-        yield b'<tbody>'
+        yield b"<tbody>"
         for row in rows:
             values = map(convert_value_to_unicode, row)
-            values = [i.encode('utf-8').replace(b'\n', b'<br>') for i in values]
-            yield b'<tr><td>%s</td></tr>' % b'</td><td>'.join(values)
-        yield b'</tbody>'
-        yield b'</table></div></body></html>'
+            values = [i.encode("utf-8").replace(b"\n", b"<br>") for i in values]
+            yield b"<tr><td>%s</td></tr>" % b"</td><td>".join(values)
+        yield b"</tbody>"
+        yield b"</table></div></body></html>"
 
-    return StreamingHttpResponse(output_generator(),
-                                 content_type='text/html; charset=UTF-8')
+    return StreamingHttpResponse(
+        output_generator(), content_type="text/html; charset=UTF-8"
+    )
 
 
 @return_debug_reponse
@@ -153,7 +160,7 @@ def export_to_excel_response(filename, headers, rows):
     """Returns a downloadable HttpResponse using an XLSX payload generated from headers and rows"""
 
     # See http://technet.microsoft.com/en-us/library/ee309278%28office.12%29.aspx
-    content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
     # This cannot be a StreamingHttpResponse because XLSX files are .zip format and
     # the Python ZipFile library doesn't offer a generator form (which would also
@@ -161,15 +168,20 @@ def export_to_excel_response(filename, headers, rows):
 
     resp = HttpResponse(content_type=content_type)
 
-    workbook = xlsxwriter.Workbook(resp, {'constant_memory': True,
-                                          'in_memory': True,
-                                          'default_date_format': 'yyyy-mm-dd'})
+    workbook = xlsxwriter.Workbook(
+        resp,
+        {
+            "constant_memory": True,
+            "in_memory": True,
+            "default_date_format": "yyyy-mm-dd",
+        },
+    )
 
-    date_format = workbook.add_format({'num_format': 'yyyy-mm-dd'})
+    date_format = workbook.add_format({"num_format": "yyyy-mm-dd"})
 
     worksheet = workbook.add_worksheet()
 
-    for y, row in enumerate(chain((headers, ), rows)):
+    for y, row in enumerate(chain((headers,), rows)):
         for x, col in enumerate(row):
             if isinstance(col, datetime.datetime):
                 # xlsxwriter cannot handle timezones:
@@ -215,14 +227,16 @@ def export_to_csv_response(filename, headers, rows):
     # doesn't have a way to emit chunks from ZipFile and StreamingHttpResponse does not
     # offer a file-like handle.
 
-    return StreamingHttpResponse((writer.writerow(row) for row in row_generator()),
-                                 content_type='text/csv; charset=utf-8')
+    return StreamingHttpResponse(
+        (writer.writerow(row) for row in row_generator()),
+        content_type="text/csv; charset=utf-8",
+    )
 
 
 def force_utf8_encoding(f):
     @wraps(f)
     def inner():
         for row in f():
-            yield [i.encode('utf-8') for i in row]
+            yield [i.encode("utf-8") for i in row]
 
     return inner
